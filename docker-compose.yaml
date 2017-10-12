@@ -3,10 +3,10 @@ swagger-filter:
     ports:
         - 5000:80
     environment:
-        URL: http://api.local/v1/api-docs
         FILTER: |
             {
                 "external": {
+                    "url": "http://api.local/v1/api-docs",
                     "override": {
                         "host": "api.external.com",
                         "basePath": "/api/v1",
