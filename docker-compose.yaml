@@ -1,0 +1,34 @@
+swagger-filter:
+    build: .
+    ports:
+        - 5000:80
+    environment:
+        URL: http://api.local/v1/api-docs
+        FILTER: |
+            {
+                "external": {
+                    "override": {
+                        "host": "api.external.com",
+                        "basePath": "/api/v1",
+                        "securityDefinitions": {
+                            "Authorization": {
+                                "type": "apiKey",
+                                "name": "Authorization",
+                                "in": "header"
+                            }
+                        }
+                    },
+                    "pathOverride": {
+                        "security": [
+                            {"Authorization": []}
+                        ],
+                        "tags": [
+                            "default"
+                        ]
+                    },
+                    "includes": {
+                        "getUser": {},
+                        "setUser": {}
+                    }
+                }
+            }
