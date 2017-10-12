@@ -1,6 +1,8 @@
 const filter = require('./filter').filter;
 const fetch = require('./filter').fetch;
 const express = require('express');
+const Promise = require('bluebird');
+
 
 function listen(port, swaggers) {
     let app = express();
@@ -25,23 +27,29 @@ function listen(port, swaggers) {
 }
 
 const FILTER = JSON.parse(process.env.FILTER);
+const PORT = parseInt(process.env.PORT) || 80;
 
-fetch(process.env.URL)
-    .then(api => {
+Promise.try(() => {
         let promises = [];
         for (let [k, v] of Object.entries(FILTER)) {
-            promises.push(filter({
-                api,
-                id: k,
-                includes: v.includes,
-                override: v.override,
-                pathOverride: v.pathOverride
-            }));
+            let promise = Promise.try(() => {
+                    return fetch(v.url);
+                })
+                .then((api) => {
+                    return filter({
+                        api,
+                        id: k,
+                        includes: v.includes,
+                        override: v.override,
+                        pathOverride: v.pathOverride
+                    });
+                });
+            promises.push(promise);
         }
         return Promise.all(promises);
     })
     .then(swaggers => {
-        return listen(80, swaggers);
+        return listen(PORT, swaggers);
     })
     .catch(err => {
         console.error(err.stack||err);
